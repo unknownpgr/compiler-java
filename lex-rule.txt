@@ -1,0 +1,31 @@
+STRING	: "[^"]+"
+
+BRACKET_A_O : \[
+BRACKET_A_C : \]
+BRACKET_B_O : \{
+BRACKET_B_C : \}
+BRACKET_C_O : \(
+BRACKET_C_C : \)
+
+SPACE 	: [\n\r \t]+
+SPLIT	: ;
+
+OPERATOR_TWO_UNI 	: [+][+]|--
+OPERATRO_TWO_BIN	: [+]=|[-]=
+OPERATOR_COMP		: >=|<=|==
+OPERATOR_NOT 		: [!]
+OPERATOR_PLUSMINUS 	: [+]|-
+OPERATOR_ASSIGN		: [=]
+OPERATOR_REFER 		: [.]
+
+TYPE 	: (int|boolean|void)#
+QUALIFIER : (public|private|static)#
+CLASS 	: class#
+RETURN 	: return#
+BOOLEAN : (true|false)#
+IF 		: (if)#
+ELSE	: (else)#
+THIS	: (this)#
+NEW 	: (new)#
+IDENTIFIER 	: ([a-zA-Z]|_)([a-zA-Z0-9]|_)*
+NUMBER 		: (0|[1-9][0-9]*)

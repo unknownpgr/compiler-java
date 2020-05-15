@@ -1,0 +1,95 @@
+type : TYPE BRACKET_A_O BRACKET_A_C
+type : TYPE
+var_def : QUALIFIER type IDENTIFIER
+var_def : type IDENTIFIER
+var_def_full : var_def SPLIT
+
+class_def : QUALIFIER CLASS IDENTIFIER
+class_def : CLASS IDENTIFIER
+
+function_def : var_def BRACKET_C_O BRACKET_C_C
+function_def : var_def BRACKET_C_O var_def BRACKET_C_C
+function_full : function_def codeblock
+
+constructor_def : QUALIFIER IDENTIFIER BRACKET_C_O var_def BRACKET_C_C
+constructor_def : IDENTIFIER BRACKET_C_O var_def BRACKET_C_C
+constructor_full : constructor_def codeblock
+
+if_condition : IF BRACKET_C_O exp BRACKET_C_C
+if : if_condition codeblock
+else: ELSE codeblock
+if_else : if else
+
+// Expressions
+
+exp : obj
+exp : IDENTIFIER
+exp : NUMBER
+exp : BOOLEAN
+exp : STRING
+
+refer : THIS OPERATOR_REFER exp
+refer : exp OPERATOR_REFER exp
+exp : refer
+
+func_call : exp BRACKET_C_O BRACKET_C_C
+func_call : exp BRACKET_C_O exp BRACKET_C_C
+exp : func_call
+
+type_arr : type BRACKET_A_O exp BRACKET_A_C
+op_new : NEW type
+op_new : NEW type_arr
+exp : op_new
+
+op_not : OPERATOR_NOT exp
+exp : op_not
+
+op_two_back : exp OPERATOR_TWO_UNI
+exp : op_two_back
+
+op_two_front : OPERATOR_TWO_UNI exp
+exp : op_two_front
+
+op_plusminus : exp OPERATOR_plusminus exp
+exp : op_plusminus
+
+op_sign : OPERATOR_PLUSMINUS exp
+exp : op_sign
+
+op_array : exp BRACKET_A_O exp BRACKET_A_C
+exp : op_array
+
+op_assign : exp OPERATOR_ASSIGN exp
+exp : op_assign
+
+op_compare : exp OPERATOR_COMP exp
+exp : op_compare
+
+bracket : BRACKET_C_O exp BRACKET_C_C
+exp : bracket
+
+// Codeline / Codeblock
+
+return	:RETURN exp
+codeline : return SPLIT
+codeline : exp SPLIT
+codelines : codelines codeline
+codelines : codeline
+codeblock : BRACKET_B_O codelines BRACKET_B_C
+codeblock : codelines
+codeline : if
+codeline : if_else
+
+// Feild
+
+feild : var_def_full
+feild : constructor_full
+feild : function_full
+
+feilds : feilds feild
+feilds : feild
+
+
+// Class definition
+
+class_full : class_def BRACKET_B_O feilds BRACKET_B_C
