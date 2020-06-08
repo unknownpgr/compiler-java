@@ -5,7 +5,8 @@ import java.util.Stack;
 import java.util.regex.MatchResult;
 
 /**
- * 분석된 토큰을 저장하는 클래스.
+ * 분석된 토큰을 저장하는 클래스. 원래는 그렇게 하면 안 되지만, 개발의 편의를 위하여 토큰과 Parse tree의 Nonterminal을
+ * 함께 구현한다.
  * 
  * @author 권준호
  *
@@ -13,8 +14,9 @@ import java.util.regex.MatchResult;
 public class Token implements Comparable<Token> {
 	private Lex lex;
 	private Parse parse;
+	private String fullText;
 	private String text;
-	private int start;
+	private int start = -1;
 	private int end;
 	private ArrayList<Token> children = new ArrayList<Token>();
 
@@ -24,16 +26,16 @@ public class Token implements Comparable<Token> {
 	 * @param lex
 	 * @param mr
 	 */
-	public Token(Lex lex, MatchResult mr) {
+	public Token(Lex lex, MatchResult mr, String fullText) {
 		this.lex = lex;
 		this.text = mr.group().replace("#", "");
 		this.start = mr.start();
 		this.end = mr.end();
+		this.fullText = fullText;
 	}
 
-	public Token(Parse parse, int position) {
+	public Token(Parse parse) {
 		this.parse = parse;
-		this.start = position;
 	}
 
 	/**
@@ -42,7 +44,10 @@ public class Token implements Comparable<Token> {
 	 * @return 현재 토큰의 raw text
 	 */
 	public String getText() {
-		return text;
+		if (text != null)
+			return text.trim();
+		else
+			return fullText.substring(start, end).trim();
 	}
 
 	/**
@@ -68,12 +73,37 @@ public class Token implements Comparable<Token> {
 		return null;
 	}
 
+	/**
+	 * 새로운 자식 노드를 추가한 후, 노드 정보를 업데이트한다.
+	 * 
+	 * @param token
+	 */
 	public void addChild(Token token) {
+//		Add child
 		children.add(token);
+
+//		Update token range
+		if (start < 0)
+			start = token.start;
+		else
+			start = Math.min(start, token.start);
+		end = Math.max(end, token.end);
+
+//		Set full text
+		if (fullText == null)
+			fullText = token.fullText;
+	}
+
+	public Token getChild(int index) {
+		return children.get(index);
 	}
 
 	public Token[] getChildren() {
 		return (Token[]) children.toArray(new Token[0]);
+	}
+
+	public int getChildCount() {
+		return children.size();
 	}
 
 	@Override
@@ -90,9 +120,27 @@ public class Token implements Comparable<Token> {
 		if (lex != null)
 			return text + "\t: " + getRuleName() + "[" + start + "," + end + "]";
 		if (parse != null)
-			return getRuleName() + "[" + start + "]";
+			return getRuleName() + "[" + start + "," + end + "]";
 		System.err.println("Both lex and parse are null.");
 		return null;
+	}
+
+	/**
+	 * 이 토큰이 Terminal인지 반환
+	 * 
+	 * @return 이 토큰이 Terminal인지 여부
+	 */
+	public boolean isTerminal() {
+		return lex != null;
+	}
+
+	/**
+	 * 이 토큰이 Nonterminal인지 반환
+	 * 
+	 * @return 이 토큰이 Nonterminal인지 반환
+	 */
+	public boolean isNonterminal() {
+		return parse != null;
 	}
 
 	/**

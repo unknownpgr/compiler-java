@@ -1,5 +1,7 @@
-type : TYPE BRACKET_A_O BRACKET_A_C
+type_arr : TYPE BRACKET_A_O BRACKET_A_C
 type : TYPE
+type : type_arr
+
 var_def : QUALIFIER type IDENTIFIER
 var_def : type IDENTIFIER
 var_def_full : var_def SPLIT
@@ -80,16 +82,16 @@ codeblock : codelines
 codeline : if
 codeline : if_else
 
-// Feild
+// Field
 
-feild : var_def_full
-feild : constructor_full
-feild : function_full
+field : var_def_full
+field : constructor_full
+field : function_full
 
-feilds : feilds feild
-feilds : feild
+fields : fields field
+fields : field
 
 
 // Class definition
 
-class_full : class_def BRACKET_B_O feilds BRACKET_B_C
+class_full : class_def BRACKET_B_O fields BRACKET_B_C

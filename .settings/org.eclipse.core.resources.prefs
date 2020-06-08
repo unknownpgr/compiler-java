@@ -1,5 +1,6 @@
 eclipse.preferences.version=1
 encoding//src/main/Main.java=UTF-8
+encoding//src/main/Visualizer.java=UTF-8
 encoding//src/parser/Lex.java=UTF-8
 encoding//src/parser/Lexer.java=UTF-8
 encoding//src/parser/Parse.java=UTF-8

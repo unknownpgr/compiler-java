@@ -29,16 +29,16 @@ public class Main {
 		for (Lex rule : lexer.getLexes()) {
 			System.out.println(rule);
 		}
-		
+
 //		Lexing
 		Token[] tokens = lexer.lex(src);
 
 //		Print tokenized code
-		System.out.println("\n====[ TOKNIZER ]================");
+		System.out.println("\n====[ TOKNIZED ]================");
 		printTokens(tokens);
 
 //		Print parsing rule
-		System.out.println("\n====[ PARSING RULES ]================");		
+		System.out.println("\n====[ PARSING RULES ]================");
 		for (Parse rule : parser.getLexes()) {
 			System.out.println(rule);
 		}
@@ -47,14 +47,14 @@ public class Main {
 		Token parsedToken = parser.parse(tokens);
 
 //		Print parsed tokens
-		System.out.println("\n====[ PARSING ]================");
+		System.out.println("\n====[ PARSED ]================");
 		printTokens(new Token[] { parsedToken });
 
 //		Skip some tokens
 		System.out.println("\n====[ SKIP ]================");
 
 //		Unroll some recursive tokens
-		Token.skipToken(parsedToken, "feilds");
+		Token.skipToken(parsedToken, "fields");
 		Token.skipToken(parsedToken, "exp");
 		Token.skipToken(parsedToken, "codelines");
 		Token.skipToken(parsedToken, "codeline");
@@ -73,6 +73,10 @@ public class Main {
 
 //		Print abstract semantic tree
 		printTokens(new Token[] { parsedToken });
+
+//		Start visualization
+		Visualizer v = new Visualizer(parsedToken);
+		v.setVisible(true);
 	}
 
 	/**

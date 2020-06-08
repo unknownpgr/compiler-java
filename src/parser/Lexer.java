@@ -111,9 +111,13 @@ public class Lexer {
 	}
 
 	/**
-	 * 파싱 중에 사용되는 변수. 현재 파싱 중인 룰을 나타낸다.
+	 * 파싱 중에 사용되는 변수. 현재 파싱 중인 룰을 나타낸다. 전역변수로 한 것은 java에서 closer지원을 하지 않기 때문.
 	 */
 	private Lex currentLex;
+	/**
+	 * 파싱할 전체 문자열. 나중에 nonterminal token을 위해서 저장한다.
+	 */
+	private String fullText;
 
 	/**
 	 * 주어진 문자열을 렉싱하여 토큰들의 리스트로 변환한다. 어떤 토큰에도 해당되지 않는 문자가 있으면 예외가 발생한다.
@@ -124,13 +128,14 @@ public class Lexer {
 	 */
 	public Token[] lex(String input) throws Exception {
 		log("Initial string = \n" + input);
+		fullText = input;
 		PriorityQueue<Token> pq = new PriorityQueue<Token>();
 
 //		Replacer 함수를 정의한다. 이 함수는 입력 문자열에서 특정 부분을 토큰으로 치환하여 토큰 우선순위 큐에 삽입하고, 특정 부분만큼의 길이를 가진 # 문자열을 반환한다.
 		Function<MatchResult, String> replacer = new Function<MatchResult, String>() {
 			@Override
 			public String apply(MatchResult t) {
-				pq.add(new Token(currentLex, t));
+				pq.add(new Token(currentLex, t, fullText));
 				String replacement = "";
 				for (int i = 0; i < t.group().length(); i++) {
 					replacement += "#";

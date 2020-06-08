@@ -62,7 +62,7 @@ public class Parser {
 	}
 
 	/**
-	 * 파싱 규칙들의 배열 반환한다
+	 * 파싱 규칙들의 배열을 반환한다.
 	 * 
 	 * @return 파싱 규칙들의 배열
 	 */
@@ -71,7 +71,7 @@ public class Parser {
 	}
 
 	/**
-	 * 주어진 토큰 리스트에서, 주어진 파싱 룰을 적용할 수 있는 가장 왼쪽의 경우에 파싱 룰을 적용한다.
+	 * 주어진 토큰 리스트에서 주어진 파싱 룰을 적용할 수 있는 가장 왼쪽의 경우에 파싱 룰을 적용한다.
 	 * 
 	 * @param tokens 파싱 룰을 적용할 토큰 리스트
 	 * @param parse  적용할 파싱 룰
@@ -91,7 +91,7 @@ public class Parser {
 			}
 			if (find) {
 				// Remove existing tokens
-				Token replace = new Token(parse, i);
+				Token replace = new Token(parse);
 				for (int j = 0; j < patternLength; j++) {
 					Token removed = tokens.remove(i);
 					replace.addChild(removed);
@@ -105,6 +105,8 @@ public class Parser {
 
 	/**
 	 * 더이상 불가능할 때까지, 왼쪽에서 오른쪽으로, 우선순위가 높은 룰부터 낮은 룰 순으로 파싱 규칙을 적용한다.
+	 * 사실 원래대로라면 왼쪽에서 오른쪽이 아니라 최대한 많은 문자열이 매칭되는 순으로 파싱을 진행하여야 한다.
+	 * 그러나 제대로 된 컴파일러를 구현하는 것이 목적이 아니라, 과제로 제출할 간단한 컴파일러가 목표이므로 생략한다.
 	 * 
 	 * @param tokens 파싱할 토큰들의 배열
 	 * @return 루트 토큰
