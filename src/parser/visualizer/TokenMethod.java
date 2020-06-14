@@ -26,9 +26,9 @@ class TokenMethod extends TokenWrapper {
 			}
 		} else {
 			Token constDef = getToken().getChild(0);
-			modifier = constDef.getChild(0).getText();
-			type = getName() + "(Constructor)";
 			name = constDef.getChild(1).getText();
+			modifier = constDef.getChild(0).getText();
+			type = "Constructor";
 			if (constDef.getChildCount() > 2) {
 				paramType = constDef.getChild(2).getChild(0).getText();
 			}
@@ -54,7 +54,7 @@ class TokenMethod extends TokenWrapper {
 
 	@Override
 	public String getName() {
-		return name;
+		return name + "(" + paramType + ")";
 	}
 
 	@Override
@@ -69,7 +69,7 @@ class TokenMethod extends TokenWrapper {
 
 	@Override
 	public String toString() {
-		return getName() + "(" + paramType + ")";
+		return getName();
 	}
 
 	@Override

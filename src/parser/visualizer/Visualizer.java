@@ -54,6 +54,7 @@ public class Visualizer extends JFrame {
 
 	public Visualizer() {
 		// JFrame setting
+		setTitle("Class Viewer");
 		setSize(960, 720);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -234,6 +235,7 @@ public class Visualizer extends JFrame {
 	 * @param selPath 선택된 노드를 담고 있는 Path
 	 */
 	private void event(TreePath selPath) {
+		// 선택된 path가 올바른지 점검한다.
 		if (selPath == null) {
 			System.out.println("SELECTED PAHT IS NULL");
 			return;
@@ -244,56 +246,78 @@ public class Visualizer extends JFrame {
 
 		// 만약 선택한 노드가 클래스였을 경우
 		if (tokenWrapper instanceof TokenClass) {
+			// Name / Type / Access modifier 형태의 TableModel을 만든다.
 			String[] columns = { "Name", "Type", "Access" };
-			// Set table
 			Object[][] rows = new Object[tokenWrapper.getChildCount()][];
 			for (int i = 0; i < tokenWrapper.getChildCount(); i++) {
 				TokenWrapper child = tokenWrapper.getChild(i);
 				Object[] row = { child.getName(), child.getType(), child.getModifier() };
 				rows[i] = row;
 			}
+
+			// TableModel을 table에 적용한다.
 			DefaultTableModel tableModel = new DefaultTableModel(rows, columns);
 			table.setModel(tableModel);
+
+			// textArea의 내용을 지운다.
 			textArea.setText("");
+
+			// cardLayout에서 table이 있는 card를 표시하도록 바꾼다.
 			cardLayout.first(panelRight);
 		}
 
 		// 만약 선택된 노드가 메서드였을 경우
 		else if (tokenWrapper instanceof TokenMethod) {
+			// sourceCode JTextArea에 현재 토큰의 텍스트를 표시한다.
+			// replace는 JTextArea 상에서 탭 간격이 너무 커서 가독성을 떨어트리기 때문에, 스페이스 네 개로 바꾼 것이다.
 			sourceCode.setText(tokenWrapper.getToken().getText().replace("\t", "    "));
+
+			// 메서드에서 사용하는 field를 가져온다.
 			String usedFieldString = "Use :\n";
 			TokenMethod tokenMethod = (TokenMethod) tokenWrapper;
+			// 현재 메서드에서 사용하는 reference를 전부 가져온다. 여기에는 지역 변수, 전역 변수, 메서드 등이 전부 포함된다.
+			TokenClass root = (TokenClass) tokenMethod.getRoot();
 			for (String field : tokenMethod.getReferences()) {
-				TokenClass root = (TokenClass) tokenMethod.getRoot();
+				// 만약 해당 reference가 field이면 usedFieldString에 추가한다.
 				if (root.hasField(field))
 					usedFieldString += field + "\n";
 			}
+			// JTree 아래의 JTextArea에 usedFieldString을 표시한다.
 			textArea.setText(usedFieldString);
+
+			// cardLayout에서 sourceCode JTextArea가 있는 card를 표시하도록 바꾼다.
 			cardLayout.last(panelRight);
 		}
 
 		// 만약 선택된 노드가 변수(Field)였을 경우
 		else if (tokenWrapper instanceof TokenField) {
-			String[] columns = { "Name", "Method" };
-
-			// Set table
+			// 모든 메서드를 순회하면서 해당 field를 사용하는 변수만을 가져온다.
 			ArrayList<TokenMethod> usingMethods = new ArrayList<TokenMethod>();
 			for (TokenMethod method : ((TokenClass) tokenWrapper.getRoot()).getMethods()) {
 				if (method.getReferences().contains(tokenWrapper.getName()))
 					usingMethods.add(method);
 			}
+
+			// Name / Method 형태의 TableModel을 만든다.
+			String[] columns = { "Name", "Method" };
 			Object[][] rows = new Object[usingMethods.size()][];
 			for (int i = 0; i < usingMethods.size(); i++) {
 				Object[] row = { tokenWrapper.getName(), usingMethods.get(i) };
 				rows[i] = row;
 			}
+
+			// TableModel을 table에 적용한다.
 			DefaultTableModel tableModel = new DefaultTableModel(rows, columns);
 			table.setModel(tableModel);
+
+			// textArea의 내용을 지운다.
 			textArea.setText("");
+
+			// cardLayout에서 table이 있는 card를 표시하도록 바꾼다.
 			cardLayout.first(panelRight);
 		} else {
+			// 만약 이상한 입력이 들어오면 예외 메시지를 콘솔에 띄우고, 아무것도 하지 않는다.
 			System.err.println("Unregistered token");
-			textArea.setText("");
 		}
 	}
 }

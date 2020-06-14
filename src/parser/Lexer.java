@@ -94,7 +94,7 @@ public class Lexer {
 	/**
 	 * 파싱 중 로그를 띄울지 설정한다.
 	 * 
-	 * @param logging true=>로그 띄움, false=>로그 숨김
+	 * @param logging true=로그 띄움, false=로그 숨김
 	 */
 	public void setLoggin(boolean logging) {
 		this.logging = logging;

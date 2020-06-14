@@ -14,8 +14,8 @@ public class Parser {
 	/**
 	 * 파일에서 파싱 규칙을 로드
 	 * 
-	 * @param parserFile
-	 * @throws Exception
+	 * @param parserFile 파싱 규칙을 서술한 파일
+	 * @throws Exception 파싱 규칙이 잘못되거나 파일을 여는 데 문제가 있을 경우 발생
 	 */
 	public Parser(File parserFile) throws Exception {
 		init(IO.readFile(parserFile));
@@ -24,8 +24,8 @@ public class Parser {
 	/**
 	 * 파싱 문자열에서 파싱 규칙을 로드
 	 * 
-	 * @param parserString
-	 * @throws Exception
+	 * @param parserString 파싱 규칙을 서술한 파일의 경로
+	 * @throws Exception 파싱 규칙이 잘못되거나 파일을 여는 데 문제가 있을 경우 발생
 	 */
 	public Parser(String parserString) throws Exception {
 		init(parserString);

@@ -3,7 +3,7 @@ package parser;
 import java.util.regex.Pattern;
 
 /**
- * 렉싱 규칙을 저장하는 클래스. 정규표현식과 토큰 이름의 튜플 <Patter,Name>이다.
+ * 렉싱 규칙을 저장하는 클래스. 정규표현식과 토큰 이름의 튜플 (Patter,Name)이다.
  * 
  * @author 권준호
  *

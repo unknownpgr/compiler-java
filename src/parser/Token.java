@@ -21,10 +21,11 @@ public class Token implements Comparable<Token> {
 	private ArrayList<Token> children = new ArrayList<Token>();
 
 	/**
-	 * 이 토큰에 해당하는 규칙과 정규표현식 매칭 결과를 가져온다.
+	 * 이 토큰에 해당하는 규칙과 정규표현식 매칭 결과를 받아 토큰을 생성한다.
 	 * 
-	 * @param lex
-	 * @param mr
+	 * @param lex 토큰을 생성하는 데 사용된 lexing 규칙
+	 * @param mr 정규표현식 매칭 결과
+	 * @param fullText 소스코드 전체 문자열
 	 */
 	public Token(Lex lex, MatchResult mr, String fullText) {
 		this.lex = lex;
@@ -34,6 +35,11 @@ public class Token implements Comparable<Token> {
 		this.fullText = fullText;
 	}
 
+	/**
+	 * 이 토큰에 해당하는 규칙을 받아 토큰을 생성한다.
+	 * 
+	 * @param parse 토큰을 생성하는 데 사용된 parsing 규칙
+	 */
 	public Token(Parse parse) {
 		this.parse = parse;
 	}
@@ -76,7 +82,7 @@ public class Token implements Comparable<Token> {
 	/**
 	 * 새로운 자식 노드를 추가한 후, 노드 정보를 업데이트한다.
 	 * 
-	 * @param token
+	 * @param token 새로 추가할 자식 노드
 	 */
 	public void addChild(Token token) {
 //		Add child
