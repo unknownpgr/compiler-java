@@ -2,18 +2,24 @@ package parser.visualizer;
 
 import java.awt.CardLayout;
 import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
-import javax.swing.SwingUtilities;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -21,37 +27,49 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import parser.IO;
+import parser.Lex;
+import parser.Lexer;
+import parser.Parse;
+import parser.Parser;
 import parser.Token;
 
 public class Visualizer extends JFrame {
 
-	private TokenTreeModel tokenTreeModel;
+	/**
+	 * Tree 아래의 text 영역
+	 */
 	private JTextArea textArea;
-	private JTree tree;
+	/**
+	 * 자바 파일 구조를 보여 줄 tree model
+	 */
+	private JTree tree = new JTree();
+	/**
+	 * 
+	 */
 	private JPanel panelRight = new JPanel();
 	private JTable table = new JTable();
 	private JTextArea sourceCode = new JTextArea();
 	private CardLayout cardLayout = new CardLayout();
 
-	public Visualizer(Token root) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-			UnsupportedLookAndFeelException {
+	public Visualizer() {
 		// JFrame setting
 		setSize(960, 720);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-		// Set splitPane
-		JSplitPane jspMain = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		JSplitPane jspSub = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-
-		// Set right panel layout
+		// Right panel layout setting
 		panelRight.setLayout(cardLayout);
 		JScrollPane scrollPane = new JScrollPane(table);
 		panelRight.add(scrollPane);
 		panelRight.add(sourceCode);
 
+		// Text area setting
+		textArea = new JTextArea();
+		textArea.setText("Use : ");
+		textArea.setEditable(false);
+
 		// Tree model setting
-		tokenTreeModel = new TokenTreeModel(root);		
-		tree = new JTree(tokenTreeModel);
+		tree.setModel(null);
 		tree.addTreeSelectionListener(new TreeSelectionListener() {
 			@Override
 			public void valueChanged(TreeSelectionEvent e) {
@@ -59,23 +77,155 @@ public class Visualizer extends JFrame {
 			}
 		});
 
-		// Text area setting
-		textArea = new JTextArea();
-		textArea.setText("Use : ");
-		textArea.setEditable(false);
+		// Split pane setting
+		JSplitPane jspMain = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		JSplitPane jspSub = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
-		// Split pane setting at the end
-		jspMain.setLeftComponent(jspSub);
 		jspMain.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-		jspMain.setEnabled(false);
-		jspSub.setEnabled(false);
+		jspMain.setLeftComponent(jspSub);
 		jspMain.setRightComponent(add(panelRight));
+		jspMain.setEnabled(false);
+		jspMain.setDividerLocation(getSize().width / 2);
+
 		jspSub.setTopComponent(tree);
 		jspSub.setBottomComponent(textArea);
+		jspSub.setEnabled(false);
+		jspSub.setDividerLocation(getSize().height * 3 / 4);
+
 		Container cp = getContentPane();
 		cp.add(jspMain);
-		jspMain.setDividerLocation(getSize().width / 2);
-		jspSub.setDividerLocation(getSize().height * 3 / 4);
+
+		// Menu setting
+		JMenuBar menuBar = new JMenuBar();
+		JMenu file = new JMenu("File");
+		JMenuItem open = new JMenuItem("Open");
+		open.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Get file
+				JFileChooser chooser = new JFileChooser("./");
+				int returnValue = chooser.showOpenDialog(null);
+				File file = null;
+				if (returnValue == JFileChooser.APPROVE_OPTION)
+					file = chooser.getSelectedFile();
+
+				// Check if file is proper
+				if (file == null)
+					return;
+				if (!file.exists()) {
+					JOptionPane.showMessageDialog(null, "선택하신 파일이 존재하지 않습니다.", "File selection error",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				// Try parse and display
+				String filePath = file.getPath();
+				try {
+					Token token = parse(filePath);
+					TokenTreeModel tokenTreeModel = new TokenTreeModel(token);
+					tree.setModel(tokenTreeModel);
+				} catch (Exception e1) {
+					JOptionPane.showMessageDialog(null, "올바른 JAVA 소스 파일이 아닙니다.", "File type error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		file.add(open);
+		menuBar.add(file);
+		setJMenuBar(menuBar);
+	}
+
+	public Token parse(String sourcFilePath) throws Exception {
+		// Print raw sourcecode
+		System.out.println("\n====[ RAW ]================");
+		String src = IO.readFile(sourcFilePath);
+		System.out.println(src);
+
+		// Print lex rule
+		Lexer lexer = new Lexer(new File("./lex-rule.txt"));
+		Parser parser = new Parser(new File("./parse-rule.txt"));
+
+		// Add skip rule
+		lexer.addSkip("SPACE");
+
+		// Print lexing rule
+		System.out.println("\n====[ LEXING RULES ]================");
+		for (Lex rule : lexer.getLexes()) {
+			System.out.println(rule);
+		}
+
+		// Lexing
+		Token[] tokens = lexer.lex(src);
+
+		// Print tokenized code
+		System.out.println("\n====[ TOKNIZED ]================");
+		printTokens(tokens);
+
+		// Print parsing rule
+		System.out.println("\n====[ PARSING RULES ]================");
+		for (Parse rule : parser.getLexes()) {
+			System.out.println(rule);
+		}
+
+		// Parsing
+		Token parsedToken = parser.parse(tokens);
+
+		// Print parsed tokens
+		System.out.println("\n====[ PARSED ]================");
+		printTokens(new Token[] { parsedToken });
+
+		// Skip some tokens
+		System.out.println("\n====[ SKIP ]================");
+
+		// Unroll some recursive tokens
+		Token.skipToken(parsedToken, "fields");
+		Token.skipToken(parsedToken, "exp");
+		Token.skipToken(parsedToken, "codelines");
+		Token.skipToken(parsedToken, "codeline");
+
+		// Remove some keywords
+		Token.skipToken(parsedToken, "CLASS");
+		Token.skipToken(parsedToken, "IF");
+		Token.skipToken(parsedToken, "ELSE");
+		Token.skipToken(parsedToken, "SPLIT");
+		Token.skipToken(parsedToken, "NEW");
+		Token.skipToken(parsedToken, "RETURN");
+		Token.skipToken(parsedToken, "BRACKET.+");
+		Token.skipToken(parsedToken, "OPERATOR_NOT");
+		Token.skipToken(parsedToken, "OPERATOR_ASSIGN");
+		Token.skipToken(parsedToken, "OPERATOR_REFER");
+
+		// Print abstract semantic tree
+		printTokens(new Token[] { parsedToken });
+		return parsedToken;
+	}
+
+	/**
+	 * 토큰들의 배열, 혹은 토큰들의 트리를 나타내는 문자열을 콘솔로 출력한다.
+	 * 
+	 * @param tokens 출력할 토큰들
+	 */
+	private static void printTokens(Token[] tokens) {
+		System.out.println(_printTokens(tokens, 0));
+	}
+
+	/**
+	 * 재귀적으로 토큰들의 배열, 혹은 토큰들의 트리를 나타내는 문자열을 출력한다.
+	 * 
+	 * @param tokens 출력할 토큰들
+	 * @param depth  재귀적 출력의 깊이. 호출할 때에는 depth=0으로 하고 호출하면 된다.
+	 * @return 토큰들을 나타내는 문자열
+	 */
+	private static String _printTokens(Token[] tokens, int depth) {
+		String r = "";
+		for (Token t : tokens) {
+			for (int i = 0; i < depth; i++) {
+				r += "    ";
+			}
+			r += t + "\n";
+			r += _printTokens(t.getChildren(), depth + 1);
+		}
+		return r;
 	}
 
 	/**
@@ -89,10 +239,10 @@ public class Visualizer extends JFrame {
 			return;
 		}
 
-		// 선�?�?� 노드
+		// 선택한 노드
 		TokenWrapper tokenWrapper = (TokenWrapper) selPath.getLastPathComponent();
 
-		// 만약 선�?�?� 노드가 �?�래스�?� 경우
+		// 만약 선택한 노드가 클래스였을 경우
 		if (tokenWrapper instanceof TokenClass) {
 			String[] columns = { "Name", "Type", "Access" };
 			// Set table

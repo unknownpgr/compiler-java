@@ -1,41 +1,131 @@
-<style>
-@import url(https://fonts.googleapis.com/css?family=Oxygen);
+# Context-free grammar based java parser with pure java
 
-body {
- font-family: 'Oxygen', sans-serif; 
-}
-</style>
+### Goal
 
-## Context-free grammar based java parser with pure java
-객체지향프로그래밍 수업에서 java 파일을 String으로 읽어 그 구조를 GUI로 나타내는 과제가 나왔다. 이를 수행하려면 먼저 java source파일의 구조를 파악해야 한다. 과제에서는 각 함수가 참조하는 변수가 무엇인지, 클래스가 포함하는 field가 무엇인지 정도만을 출력하면 된다고 하였다. 그러므로 과제의 요구사항을 만족시키는 가장 간단한 방법은 스택이나 정규표현식을 사용한 간단한 매칭이다. 그러나 최근 컴파일러를 공부하고 있으므로, 이 기회에 ANTLR 등 외부 라이브러리를 사용하지 않고 처음부터 파서를 구현해보기로 하였다.
+ 본 프로젝트는 객체지향프로그래밍 수업의 과제를 위한 것으로, 목표는 주어진 [MyStack.java](./MyStack.java) 파일을 String으로 읽어 그 구조를 파악하고, 결과를 GUI로 나타내는 것이다.
 
-물론 실제 자바 언어의 규칙들을 전부 구현하는 것은 무리가 있고, 또한 과제의 범위도 주어진 소스파일만을 정상적으로 파싱하면 된다고 하였으므로, 소스파일에 포함된 최소한의 기능만을 인식하도록 파서를 구현하였다. 심지어 함수를 정의하거나 호출할 때 변수를 두 개 이상 사용하는 기능조차 없다.
+### Approach
+
+ 이를 수행하려면 java 파일의 구조를 파악해야 한다. 물론, 과제에서는 각 함수가 참조하는 변수가 무엇인지, 클래스가 포함하는 field가 무엇인지 정도만을 출력하면 된다고 하였다. 그러므로 과제의 요구사항을 만족시키는 가장 간단한 방법은 스택이나 정규표현식을 사용한 매칭이다.(교수님께서 ANTLR 등 외부 라이브러리는 사용할 수 없다고 하였다.) 그러나 최근 컴파일러를 공부하고 있으므로, 이 기회에 순수 Java로 밑바닥부터 프로그래밍 언어의 파서를 구현해보기로 한다.
+
+ 물론 실제 자바 언어의 규칙들을 전부 구현하는 것은 무리가 있고, 또한 과제의 범위도 주어진 소스파일만을 정상적으로 파싱하면 된다고 하였으므로, 소스파일에 포함된 최소한의 기능만을 인식하도록 파서를 구현하였다. 따라서 제네릭이나 익명 클래스 등 복잡한 문법은 구현되어있지 않으며, 심지어 함수를 정의할 때 변수를 두 개 이상 사용하는 기능조차 없다.
+
+# Structure
+
+ 본 프로젝트는 크게 Main, Parser, Visualizer의 세 가지 패키지로 나누어져 있다.
+
+- Main은 main함수가 포함되어 기본적인 코드 로드 및 파싱, Visualizer호출 등을 담당한다. 
+- Parser는 Java 소스코드를 파싱하는 기능들이 포함되어 있으며, 크게 Lexer와 Parser로 나누어져 있다.
+- Visualizer는 파싱된 코드를 GUI로 보여주는 역할을 한다.
 
 ## Lexer
-Lexer는 정규표현식을 사용하여 구현하였다. [Lexing rule](./lex-rule.txt)을 위에서부터 적용하여, 맞는 문자열이 발견되면 그 문자열을 #으로 치환하고 해당 문자열은 Token object로 Wrapping하여 Priority queue에 저장하도록 하였다. Priority queue는 문자열의 위치를 기준으로 정렬된다.
+ Lexer는 정규표현식을 사용하여 구현하였다. 소스 코드에 [Lexing rule](./lex-rule.txt)을 위에서부터 적용하여, rule에 매칭되는 부분 문자열이 발견되면 그 문자열을 #으로 치환하고 해당 문자열은 Token object로 Wrapping하여 Priority queue에 저장하도록 하였다. Token에는 어떤 Lexing rule이 적용되었는지, 매칭된 부분의 시작 위치와 끝 위치 등의 정보가 포함되어있다. Priority queue는 문자열의 시작 위치를 기준으로 정렬된다. 따라서 Priority queue에는 파싱된 토큰이 원래 문자열에서 나타나는 순서대로 들어가있다.
 
-모든 Lexing rule을 적용하고 나면 입력 문자열의 모든 문자가 #으로 치환된다.
-만약 #이 아닌 문자가 포함되어있다면 이는 어떤 토큰에도 맞지 않는 문자가 있다는 뜻으로, 그럴 경우 예외를 일으킨다.
+ 모든 Lexing rule을 적용하고 나면 입력 문자열의 모든 문자가 #으로 치환된다. 만약 #이 아닌 문자가 포함되어있다면 이는 어떤 토큰에도 맞지 않는 문자가 있다는 뜻으로, 그럴 경우 예외를 일으킨다. 아래는 일부 예시이다.
+
+ 다만 실제 컴파일러상에서는 위와 같은 규칙에 앞서 길이 순으로 Lexing rule을 적용한다. 즉, Lexing rule우선순위가 낮다 하더라도, 가장 긴 부분 문자열에 매칭되는 Lexing rule을 적용한다. 따라서 위와 같이 단순히 순서대로 매칭하면 몇 가지 예외가 생긴다. 예컨대 `println`이라는 문자열은 `IDENTIFIER`에 매칭되어야한다. 그러나 `IDENTIFIER`의 우선순위가 `TYPE`의 우선순위보다 낮기 때문에, 다음과 같이 매칭되어버린다.
+
+```
+pr 	: IDENTIFIER
+int	: TYPE
+ln 	: IDENTIFIER
+```
+
+따라서 다음과 같이 Lexing rule에 약간의 트릭을 써서 이런 문제를 회피한다.
+
+```
+TYPE : int#
+```
+
+위와 같이 하면 int라는 글자 다음에 공백이나 특수문자가 하나 이상 올 때에만 int를 `IDENTIFIER`로 인식한다. 공백 및 특수문자의 우선순위는 `TYPE`이나 `IDENTIFIER`보다 높기 때문에, 이러한 트릭을 쓸 수 있다. 물론 이것 역시 문제가 있는데, 소스코드에 print()와 같이 int로 끝나는 `IDENTIFIER`가 있으면 똑같은 문제가 발생한다는 것이다. 따라서 이런 트릭은 그런 `IDENTIFIER`가 없는 MyStack.Java에만 적용될 수 있는 것으로, 추후 수정할 필요가 있다.
+
+#### Source code
+
+```java
+class MyStack {
+	private int size;
+	private int top;
+	private int[] data;
+
+	public MyStack(int size) {
+		data = new int[size];
+		this.size = size;
+		top = 0;
+	}
+	... 중략
+}
+```
+
+#### Lexed token
+
+```
+class	: CLASS[0,6]
+MyStack	: IDENTIFIER[6,13]
+{	: BRACKET_B_O[14,15]
+private	: QUALIFIER[17,25]
+int	: TYPE[25,29]
+size	: IDENTIFIER[29,33]
+;	: SPLIT[33,34]
+private	: QUALIFIER[36,44]
+int	: TYPE[44,48]
+top	: IDENTIFIER[48,51]
+;	: SPLIT[51,52]
+private	: QUALIFIER[54,62]
+int	: TYPE[62,66]
+[	: BRACKET_A_O[65,66]
+]	: BRACKET_A_C[66,67]
+data	: IDENTIFIER[68,72]
+;	: SPLIT[72,73]
+public	: QUALIFIER[76,83]
+MyStack	: IDENTIFIER[83,90]
+(	: BRACKET_C_O[90,91]
+int	: TYPE[91,95]
+size	: IDENTIFIER[95,99]
+)	: BRACKET_C_C[99,100]
+{	: BRACKET_B_O[101,102]
+data	: IDENTIFIER[105,109]
+=	: OPERATOR_ASSIGN[110,111]
+new	: NEW[112,116]
+int	: TYPE[116,120]
+[	: BRACKET_A_O[119,120]
+size	: IDENTIFIER[120,124]
+]	: BRACKET_A_C[124,125]
+;	: SPLIT[125,126]
+this	: THIS[129,134]
+.	: OPERATOR_REFER[133,134]
+size	: IDENTIFIER[134,138]
+=	: OPERATOR_ASSIGN[139,140]
+size	: IDENTIFIER[141,145]
+;	: SPLIT[145,146]
+top	: IDENTIFIER[149,152]
+=	: OPERATOR_ASSIGN[153,154]
+0	: NUMBER[155,156]
+;	: SPLIT[156,157]
+}	: BRACKET_B_C[159,160]
+... 중략
+}	: BRACKET_B_C[537,538]
+```
+
+Split등을 쓴 경우와 다르게, 각 토큰들이 잘 분리되었을 뿐만 아니라 무슨 의미를 가지는지도 잘 표현되어있다.
 
 ## Parser
-Parser는 정말 단순하게 구현하였다. [Parsing rule](./parse-rule.txt)은 여러 개의 토큰을 하나의 토큰으로 바꾸는 규칙을 기술하며, 그냥 순서대로 이 규칙을 적용한다. 심지어 |기호를 사용하거나 리터럴을 사용하는 것초차 할 수 없으므로, 리터럴을 사용하거나 동일한 연산자 우선순위를 구현하려면 Lexing rule의 정규표현식으로 구현해야만 한다.
+ Parser는 다음과 같이 구현되었다. 먼저 [Parsing rule](./parse-rule.txt)은 여러 개의 토큰을 하나의 토큰으로 바꾸는 규칙을 기술한다. 이 파일을 따라 순서대로 규칙을 적용한다. 규칙을 적용한다는 것은, Parsing rule에서 오른쪽에 있는 토큰들을 왼쪽에 있는 토큰으로 치환한다는 의미이다.
 
-Parsing rule을 적용하는 것은 다음과 같이 이루어진다.
+ 다만 상용 컴파일러-컴파일러에서는 `|`기호를 사용하거나, Parsing rule에 리터럴을 포함하면 자동으로 Lexing시에 처리해주는 기능을 포함한다. 그러나 본 프로젝트에서는 그런 기능들을 구현하지 않았으므로 하나의 이름을 가진 Parsing rule이 여러 개 있어도 되며, 리터럴이 포함되면 안 된다.
+
+ Parsing rule을 적용하는 것은 다음의 과정을 따른다.
 1. 가장 처음의 파싱 룰을 token의 배열에 딱 한 번 적용한다. 딱 한 번 적용한다 함은, Parsing rule에 매칭되는 부분이 여러 개 있더라도 가장 왼쪽의 매칭되는 부분만을 치환한다는 것이다.
-2. 만약 파싱 룰을 적용하여 바뀐 부분이 있다면, 다시 1번으로 돌아간다. 없다면, 다음 단계로 간다.
+2. 만약 파싱 룰을 적용하여 바뀐 부분이 있다면, 다시 1번으로 돌아간다. 없다면, 다음 단계로 간다. 바뀐 부분이 있을 경우 1번으로 돌아가는 이유는, 토큰이 바뀌면서 이미 적용한 규칙들을 한 번 더 적용할 수 있는 경우가 발생할 수도 있기 때문이다.
 3. 마찬가지로 두번째의 파싱 룰을 딱 한 번 적용한다.
-4. 만약 바뀐 부분이 있다면 1번으로 돌아간다. 없다면, 다음 단계로 넘어간다.  
-:  
-:  
-n. n번째의 파싱 룰을 딱 한 번 적용한다.  
-n+1. 만약 바뀐 부분이 있다면 1번으로 돌아간다. 없다면, 파싱을 종료한다.
+4. 만약 바뀐 부분이 있다면 1번으로 돌아간다. 없다면, 다음 단계로 넘어간다. 
+5. 위의 과정을 모든 파싱 룰에 대해 반복한다.
+6. 위와 같은 과정을 따라, 모든 룰을 다 적용한 후 마지막 파싱 룰을 적용했는데, 바뀐 부분이 없다면 파싱을 종료한다.
+7. 만약 Source 및 Parsing rule에 모두 오류가 없다면, 6번까지의 과정을 마치면 토큰 하나만이 남게 된다. 그럴 경우 그 토큰을 반환하며, 만약 오류가 있어 두 개 이상의 토큰이 남게 되면 예외를 일으킨다.
 
-이는 시간복잡도를 따져 보면 R^2이나 R^3가 나올 수도 있는 매우 비효율적인 구현이지만, 어쨌든 다른 라이브러리의 도움 없이 정상적으로 작동하는 Parser를 구현하였다는 것에 의의를 둔다.
-
-만약 Source 및 Parsing rule에 모두 오류가 없다면, 이 과정을 모두 마치고 나면 토큰 하나만이 남게 된다. 그럴 경우 그 토큰을 반환하며, 만약 오류가 있어 두 개 이상의 토큰이 남게 되면 예외를 일으킨다.
+ 이는 시간복잡도를 따져 보면 R^2이나 R^3가 나올 수도 있는 매우 비효율적인 구현이지만, 어쨌든 다른 라이브러리의 도움 없이 정상적으로 작동하는 Parser를 구현하였다는 것에 의의를 둔다. 
 
 ## Abstract semantic tree (AST-fy)
-현재 파싱 룰은 |기호나 +기호 등을 사용하여 정규표현식과 같은 방법을 적용할 수 없다. 따라서 어떤 요소의 가변 개수만큼의 나열을 위해서는 다음과 같은 방법을 사용해야만 한다.
+현재 파싱 룰은 `|`기호나 `+`기호 등을 사용하여 정규표현식과 같은 방법을 적용할 수 없다. 따라서 어떤 요소의 가변 개수만큼의 나열을 위해서는 다음과 같은 방법을 사용해야만 한다.
 ```
 codelines : codelines codeline
 codelines : codeline
