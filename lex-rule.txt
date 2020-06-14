@@ -1,4 +1,4 @@
-STRING	: "[^"]+"
+STRING	: "[^"]*"
 
 BRACKET_A_O : \[
 BRACKET_A_C : \]
@@ -27,5 +27,6 @@ IF 		: (if)#
 ELSE	: (else)#
 THIS	: (this)#
 NEW 	: (new)#
+
 IDENTIFIER 	: ([a-zA-Z]|_)([a-zA-Z0-9]|_)*
 NUMBER 		: (0|[1-9][0-9]*)

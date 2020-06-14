@@ -94,14 +94,30 @@ public class Token implements Comparable<Token> {
 			fullText = token.fullText;
 	}
 
+	/**
+	 * 토큰의 index번째 child를 반환
+	 * 
+	 * @param index 몇 번째 자식인지
+	 * @return 토큰의 index번째 child
+	 */
 	public Token getChild(int index) {
 		return children.get(index);
 	}
 
+	/**
+	 * 토큰의 자식 토큰들을 모두 담은 배열을 반환
+	 * 
+	 * @return 자식 토큰들의 배열
+	 */
 	public Token[] getChildren() {
 		return (Token[]) children.toArray(new Token[0]);
 	}
 
+	/**
+	 * 자식 토큰의 개수를 반환
+	 * 
+	 * @return 자식 토큰의 개수
+	 */
 	public int getChildCount() {
 		return children.size();
 	}

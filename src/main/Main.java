@@ -8,10 +8,11 @@ import parser.Lexer;
 import parser.Parse;
 import parser.Parser;
 import parser.Token;
+import parser.visualizer.Visualizer;
 
 public class Main {
-	public static void main(String[] args) throws Exception {
-
+	public static void main(String[] args) throws Exception {		
+		
 //		Print raw sourcecode
 		System.out.println("\n====[ RAW ]================");
 		String src = IO.readFile("./source.txt");
