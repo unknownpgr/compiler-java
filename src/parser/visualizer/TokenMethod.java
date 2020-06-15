@@ -9,6 +9,9 @@ import parser.Token;
 
 class TokenMethod extends TokenWrapper {
 	private String paramType = "";
+	/**
+	 *  현재 메서드가 참조하는 변수와 함수들. 지역 변수, 전역 변수 를모두 포함함.
+	 */
 	private Set<String> references = new HashSet<String>();
 
 	private String modifier, type, name;

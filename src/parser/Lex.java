@@ -9,7 +9,13 @@ import java.util.regex.Pattern;
  *
  */
 public class Lex {
+	/**
+	 * 매칭할 정규표현식
+	 */
 	private Pattern pattern;
+	/**
+	 * 규칙 이름
+	 */
 	private String name;
 
 	/**

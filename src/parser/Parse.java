@@ -7,7 +7,13 @@ package parser;
  *
  */
 public class Parse {
+	/**
+	 * 규칙 이름
+	 */
 	String name;
+	/**
+	 * 치환할 패턴
+	 */
 	String[] parse;
 
 	public Parse(String name, String[] parse) {

@@ -45,11 +45,20 @@ public class Visualizer extends JFrame {
 	 */
 	private JTree tree = new JTree();
 	/**
-	 * 
+	 * Table, text area를 보여줄 panel
 	 */
 	private JPanel panelRight = new JPanel();
+	/**
+	 * 클래스의 멤버 / field를 사용하는 메서드를 보여줄 table
+	 */
 	private JTable table = new JTable();
+	/*
+	 * 소스 코드를 표시할 text area
+	 */
 	private JTextArea sourceCode = new JTextArea();
+	/*
+	 * panelRight의 card layout
+	 */
 	private CardLayout cardLayout = new CardLayout();
 
 	public Visualizer() {
@@ -83,6 +92,7 @@ public class Visualizer extends JFrame {
 		JSplitPane jspSub = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
 		jspMain.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+
 		jspMain.setLeftComponent(jspSub);
 		jspMain.setRightComponent(add(panelRight));
 		jspMain.setEnabled(false);
@@ -99,6 +109,7 @@ public class Visualizer extends JFrame {
 		// Menu setting
 		JMenuBar menuBar = new JMenuBar();
 		JMenu file = new JMenu("File");
+		JMenuItem exit = new JMenuItem("Exit");
 		JMenuItem open = new JMenuItem("Open");
 		open.addActionListener(new ActionListener() {
 			@Override
@@ -131,12 +142,26 @@ public class Visualizer extends JFrame {
 				}
 			}
 		});
+		exit.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
 		file.add(open);
+		file.add(exit);
 		menuBar.add(file);
 		setJMenuBar(menuBar);
 	}
 
-	public Token parse(String sourcFilePath) throws Exception {
+	/**
+	 * 주어진 경로에서 파일을 읽어 파싱을 수행한다.
+	 * 
+	 * @param sourcFilePath 파일을 읽어올 경로
+	 * @return 파싱된 루트 토큰
+	 * @throws Exception 파일이 잘못되거나, 파싱이 실패할 경우 발생
+	 */
+	private Token parse(String sourcFilePath) throws Exception {
 		// Print raw sourcecode
 		System.out.println("\n====[ RAW ]================");
 		String src = IO.readFile(sourcFilePath);

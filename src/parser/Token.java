@@ -12,12 +12,33 @@ import java.util.regex.MatchResult;
  *
  */
 public class Token implements Comparable<Token> {
+	/**
+	 * 렉싱을 통해 얻은 토큰일 경우, 해당 lexing rule
+	 */
 	private Lex lex;
+	/**
+	 * 파싱을 통해 얻은 토큰일 경우, 해당 parsing rule
+	 */
 	private Parse parse;
+	/**
+	 * 원래 소스코드 전문
+	 */
 	private String fullText;
+	/**
+	 * 현재 토큰의 row text
+	 */
 	private String text;
+	/**
+	 * 토큰의 시작 지점
+	 */
 	private int start = -1;
+	/**
+	 * 토큰의 끝 지점
+	 */
 	private int end;
+	/**
+	 * 파싱을 통해 얻은 토큰일 경우, 자식 토큰들
+	 */
 	private ArrayList<Token> children = new ArrayList<Token>();
 
 	/**

@@ -90,7 +90,7 @@ public class Parser {
 				}
 			}
 			if (find) {
-				// Remove existing tokens
+				// Replace existing tokens
 				Token replace = new Token(parse);
 				for (int j = 0; j < patternLength; j++) {
 					Token removed = tokens.remove(i);
