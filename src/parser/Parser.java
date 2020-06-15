@@ -55,8 +55,8 @@ public class Parser {
 
 			// Add rule
 			String[] parts = parserRuleString.split(":");
-			String name = parts[0].strip();
-			String[] tokenNames = parts[1].strip().split(" ");
+			String name = parts[0].trim();
+			String[] tokenNames = parts[1].trim().split(" ");
 			parses.add(new Parse(name, tokenNames));
 		}
 	}

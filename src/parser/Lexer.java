@@ -3,8 +3,6 @@ package parser;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
-import java.util.function.Function;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,8 +64,8 @@ public class Lexer {
 
 			// Add rule
 			String[] parts = rule.split(":");
-			String name = parts[0].strip();
-			String regexStr = parts[1].strip();
+			String name = parts[0].trim();
+			String regexStr = parts[1].trim();
 			Pattern regex = Pattern.compile(regexStr);
 			lexes.add(new Lex(name, regex));
 		}
@@ -131,19 +129,6 @@ public class Lexer {
 		fullText = input;
 		PriorityQueue<Token> pq = new PriorityQueue<Token>();
 
-//		Replacer 함수를 정의한다. 이 함수는 입력 문자열에서 특정 부분을 토큰으로 치환하여 토큰 우선순위 큐에 삽입하고, 특정 부분만큼의 길이를 가진 # 문자열을 반환한다.
-		Function<MatchResult, String> replacer = new Function<MatchResult, String>() {
-			@Override
-			public String apply(MatchResult t) {
-				pq.add(new Token(currentLex, t, fullText));
-				String replacement = "";
-				for (int i = 0; i < t.group().length(); i++) {
-					replacement += "#";
-				}
-				return replacement;
-			}
-		};
-
 //		순서대로 lexing rule을 적용하여 문자열을 치환해나간다. 앞서 선언한 replacer함수가 사용된다.
 		for (Lex lex : lexes) {
 			currentLex = lex;
@@ -151,7 +136,12 @@ public class Lexer {
 			Matcher m = lex.getPattern().matcher(input);
 
 			while (m.find()) {
-				input = m.replaceFirst(replacer);
+				pq.add(new Token(currentLex, m, fullText));
+				String replacement = "";
+				for (int i = 0; i < m.group().length(); i++) {
+					replacement += "#";
+				}
+				input = m.replaceFirst(replacement);
 				log(input);
 				m = lex.getPattern().matcher(input);
 			}
@@ -175,7 +165,7 @@ public class Lexer {
 			if (isSkip)
 				continue;
 			tokens.add(token);
-			log(token.getText().strip());
+			log(token.getText().trim());
 		}
 
 		return (Token[]) tokens.toArray(new Token[0]);

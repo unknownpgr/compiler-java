@@ -19,13 +19,12 @@
 - Main은 `main()`함수가 포함된 패키지로, `Visualizer`를 실행하는 역할밖에 하지 않는다.
 - Parser는 Java 소스코드를 파싱하는 기능들이 포함되어 있으며, 크게 `Lexer`와 `Parser`로 구성되어있다.
 - Visualizer는 파일 선택 및 파싱된 코드를 GUI로 보여주는 역할을 한다. 크게 `TokenWrapper`와 `Visualizer`로 구성되어있다.
+- 클래스 및 메서드에 대한 구체적 설명은 보고서 **Class Details** 부분에 있으며. 이는 프로젝트에 포함된 [JavaDoc](./doc/index.html)의 내용과 동일하다.
 
 ### How to Use
 
-1. 프로그램을 실행하면 `Class Viewer` Window가 표시된다.
-
+1. 이클립스로 프로젝트를 열거나 커맨드라인에서 프로그램을 실행하면 `Class Viewer` Window가 표시된다.
 2. 상단의 `File` 메뉴에서 `Open`을 클릭하여 파싱할 자바 파일을 선택한다.
-
 3. 좌측에 클래스 구조가 트리로 표시되며, 트리에서 요소를 선택하면 다음과 같이 작동한다.
 
    - 클래스 선택 시 모든 멤버를 `TableModel`을 사용하여 표시
@@ -33,7 +32,6 @@
    - 메서드 선택 시 소스 코드를 우측 `JTextArea`에 표시하고 좌측 하단 `JTextArea`에 메서드에서 사용하는 변수를 표시
 
    - 필드 선택 시 이를 사용하는 모든 메서드를 `TableModel`을 사용하여 표시
-
 4. 우상단의 `X`아이콘을 클릭하거나 `File->Exit`를 클릭하여 종료한다.
 
 # Parser
@@ -41,9 +39,9 @@
 ### Lexer
  Lexer는 정규표현식을 사용하여 구현하였다. 소스 코드에 [Lexing rule](./lex-rule.txt)을 위에서부터 적용하여, rule에 매칭되는 부분 문자열이 발견되면 그 문자열을 #으로 치환하고 해당 문자열은 `Token` 클래스로 wrapping하여 priority queue에 저장하도록 하였다. `Token`에는 어떤 lexing rule이 적용되었는지, 매칭된 부분의 시작 위치와 끝 위치 등의 정보가 포함되어있다. Priority queue는 문자열의 시작 위치를 기준으로 정렬된다. 따라서 priority queue에는 파싱된 토큰이 원래 문자열에서 나타나는 순서대로 들어가있다.
 
- 모든 Lexing rule을 적용하고 나면 입력 문자열의 모든 문자가 #으로 치환된다. 만약 #이 아닌 문자가 포함되어있다면 이는 어떤 토큰에도 맞지 않는 문자가 있다는 뜻으로, 그럴 경우 예외를 일으킨다.
+ 모든 lexing rule을 적용하고 나면 입력 문자열의 모든 문자가 #으로 치환된다. 만약 #이 아닌 문자가 포함되어있다면 이는 어떤 토큰에도 맞지 않는 문자가 있다는 뜻으로, 그럴 경우 예외를 일으킨다.
 
- 다만 실제 컴파일러상에서는 위와 같은 규칙에 앞서 길이 순으로 lexing rule을 적용한다. 즉, lexing rule우선순위가 낮다 하더라도, 가장 긴 부분 문자열에 매칭되는 Lexing rule을 적용한다. 따라서 위와 같이 단순히 순서대로 매칭하면 몇 가지 예외가 생긴다. 예컨대 `println`이라는 문자열은 `IDENTIFIER`에 매칭되어야한다. 그러나 `IDENTIFIER`의 우선순위가 `TYPE`의 우선순위보다 낮기 때문에, 다음과 같이 매칭되어버린다.
+ 다만 실제 컴파일러상에서는 위와 같은 규칙에 앞서 길이 순으로 lexing rule을 적용한다. 즉, lexing rule우선순위가 낮다 하더라도, 가장 긴 부분 문자열에 매칭되는 lexing rule을 적용한다. 따라서 위와 같이 단순히 순서대로 매칭하면 몇 가지 예외가 생긴다. 예컨대 `println`이라는 문자열은 `IDENTIFIER`에 매칭되어야한다. 그러나 `IDENTIFIER`의 우선순위가 `TYPE`의 우선순위보다 낮기 때문에, 다음과 같이 매칭되어버린다.
 
 ```
 pr 	: IDENTIFIER
@@ -51,7 +49,7 @@ int	: TYPE
 ln 	: IDENTIFIER
 ```
 
-따라서 다음과 같이 Lexing rule에 약간의 트릭을 써서 이런 문제를 회피한다.
+따라서 다음과 같이 lexing rule에 약간의 트릭을 써서 이런 문제를 회피한다.
 
 ```
 TYPE : int#
@@ -1057,11 +1055,11 @@ Parser rule을 저장하는 클래스
 
 * `TokenWrapper`에 포함된 메서드는 생략함
 
-| `protected java.util.ArrayList<TokenWrapper>` | `getChildren()`                   |      |
-| :-------------------------------------------- | --------------------------------- | ---- |
-| `TokenField[]`                                | `getFileds()`                     |      |
-| `TokenMethod[]`                               | `getMethods()`                    |      |
-| `boolean`                                     | `hasField(java.lang.String name)` |      |
+| `protected java.util.ArrayList<TokenWrapper>` | `getChildren()`                   | Description |
+| :-------------------------------------------- | --------------------------------- | ----------- |
+| `TokenField[]`                                | `getFileds()`                     |             |
+| `TokenMethod[]`                               | `getMethods()`                    |             |
+| `boolean`                                     | `hasField(java.lang.String name)` |             |
 
 ### parser.visualizer.TokenField
 
@@ -1090,7 +1088,7 @@ Parser rule을 저장하는 클래스
 | `private java.lang.String`                | `modifier`   |                                                              |
 | `private java.lang.String`                | `name`       |                                                              |
 | `private java.lang.String`                | `paramType`  |                                                              |
-| `private java.util.Set<java.lang.String>` | `references` | 현재 메서드가 참조하는 변수와 함수들. 지역 변수, 전역 변수 를모두 포함함. |
+| `private java.util.Set<java.lang.String>` | `references` | 현재 메서드가 참조하는 변수와 함수들. 지역 변수, 전역 변수를 모두 포함함. |
 | `private java.lang.String`                | `type`       |                                                              |
 
 ##### Consturctor
@@ -1111,9 +1109,9 @@ Parser rule을 저장하는 클래스
 
 | Modifier and Type               | Field        | Description                                            |
 | :------------------------------ | :----------- | :----------------------------------------------------- |
-| `private java.awt.CardLayout`   | `cardLayout` |                                                        |
+| `private java.awt.CardLayout`   | `cardLayout` | panelRight의 레이아웃                                  |
 | `private javax.swing.JPanel`    | `panelRight` | Table, text area를 보여줄 panel                        |
-| `private javax.swing.JTextArea` | `sourceCode` |                                                        |
+| `private javax.swing.JTextArea` | `sourceCode` | 소스코드가 표시되는 영역                               |
 | `private javax.swing.JTable`    | `table`      | 클래스의 멤버 / field를 사용하는 메서드를 보여줄 table |
 | `private javax.swing.JTextArea` | `textArea`   | Tree 아래의 text 영역                                  |
 | `private javax.swing.JTree`     | `tree`       | 자바 파일 구조를 보여 줄 tree model                    |
@@ -1193,3 +1191,8 @@ Parser rule을 저장하는 클래스
   - **Parameters:**
 
     `selPath` - 선택된 노드를 담고 있는 Path
+
+
+
+# Parsing Result
+
