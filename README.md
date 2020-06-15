@@ -16,18 +16,9 @@
 
  본 프로젝트는 크게 Main, Parser, Visualizer의 세 가지 패키지로 구성되어있다.
 
-- Main은 `main()`함수가 포함된 패키지로, Visualizer를 실행하는 역할밖에 하지 않는다.
+- Main은 `main()`함수가 포함된 패키지로, `Visualizer`를 실행하는 역할밖에 하지 않는다.
 - Parser는 Java 소스코드를 파싱하는 기능들이 포함되어 있으며, 크게 `Lexer`와 `Parser`로 구성되어있다.
 - Visualizer는 파일 선택 및 파싱된 코드를 GUI로 보여주는 역할을 한다. 크게 `TokenWrapper`와 `Visualizer`로 구성되어있다.
-
-### Result
-
-- 다음 과제의 내용들을 모두 구현하였다.
-  - Java 소스 파일을 파싱
-  - 화면 / 메뉴를 구성
-  - 상단 메뉴에서 `File -> Open`을 사용하여 파일을 열고, `File -> Exit`을 선택하여 프로그램을 종료
-  - 클래스 구조를 `TreeModel`로 표시
-  - 
 
 ### How to Use
 
@@ -721,7 +712,7 @@ Parser rule을 저장하는 클래스
 | `java.lang.String` | `getRuleName()` |             |
 | `java.lang.String` | `toString()`    |             |
 
-### parse.Parser
+### parser.Parser
 
 ##### Feild
 
@@ -1092,7 +1083,7 @@ Parser rule을 저장하는 클래스
 
 ### parser.visualizer.TokenMethod
 
-#### Fields
+### Fields
 
 | Modifier and Type                         | Field        | Description                                                  |
 | :---------------------------------------- | :----------- | :----------------------------------------------------------- |
